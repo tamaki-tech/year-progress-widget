@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="stylesheet" href="_ds/nocturne-02841ff5-ff71-445f-97c1-96e7faf05a90/styles.css">
+<script src="_ds/nocturne-02841ff5-ff71-445f-97c1-96e7faf05a90/_ds_bundle.js"></script>
+<style>body{margin:0;background:var(--color-bg);} a{color:var(--color-accent-300);} a:hover{color:var(--color-accent-200);}</style>
+</helmet>
+<div style="padding:64px;display:flex;flex-direction:column;gap:72px;font-family:var(--font-body);color:var(--color-text);min-width:1500px;background:var(--color-bg);">
+
+<header style="display:flex;flex-direction:column;gap:6px;max-width:760px;">
+<div style="font-size:12px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-accent-300);">Year Progress Widget · UI/UX</div>
+<h1 style="margin:0;font-size:42px;">今年あと何%</h1>
+<p style="margin:0;color:var(--color-neutral-400);text-wrap:pretty;">ウィジェット 4×4 / 1×2（ダーク・ライト）、ホーム画面での見え方、アプリ本体画面、アイコン、実装用の数値。表示値は現在時刻から CLAUDE.md の計算仕様（実時間比・小数第1位切り上げ）で算出しています。</p>
+</header>
+
+<section style="display:flex;flex-direction:column;gap:24px;">
+<div style="display:flex;align-items:baseline;gap:12px;"><span style="font-size:12px;color:var(--color-accent-300);">01</span><h3 style="margin:0;">ウィジェット</h3><span style="font-size:13px;color:var(--color-neutral-500);">1px = 1dp</span></div>
+<div style="display:flex;gap:56px;align-items:flex-start;flex-wrap:wrap;">
+
+<div style="display:flex;flex-direction:column;gap:12px;">
+<div style="font-size:13px;color:var(--color-neutral-400);">4×4 · ダーク</div>
+<div style="width:316px;height:316px;border-radius:24px;background:#232532;padding:24px;display:flex;flex-direction:column;box-sizing:border-box;">
+<div style="font-size:16px;font-weight:500;color:var(--color-neutral-500);font-variant-numeric:tabular-nums;">{{ year }}</div>
+<div style="flex:1;"></div>
+<div style="font-size:18px;color:var(--color-neutral-400);">{{ label }}</div>
+<div style="display:flex;align-items:baseline;gap:2px;font-variant-numeric:tabular-nums;line-height:1;margin-top:4px;"><span style="font-size:88px;font-weight:500;letter-spacing:-0.03em;color:var(--color-text);">{{ pct }}</span><span style="font-size:36px;font-weight:500;color:var(--color-neutral-400);">%</span></div>
+<div style="height:8px;border-radius:4px;background:var(--color-neutral-800);margin-top:20px;overflow:hidden;"><div style="height:100%;width:{{ barW }};background:{{ barDark }};border-radius:4px;"></div></div>
+<div style="display:flex;justify-content:space-between;font-size:12px;color:var(--color-neutral-600);margin-top:6px;"><span>1月</span><span>12月</span></div>
+<div style="font-size:18px;color:var(--color-text);margin-top:16px;">残り <span style="font-variant-numeric:tabular-nums;">{{ days }}</span> 日</div>
+</div>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:12px;">
+<div style="font-size:13px;color:var(--color-neutral-400);">1×2 · ダーク</div>
+<div style="width:72px;height:160px;border-radius:24px;background:#232532;padding:12px 8px;display:flex;flex-direction:column;align-items:center;gap:8px;box-sizing:border-box;">
+<div style="font-size:11px;font-weight:500;color:var(--color-neutral-500);font-variant-numeric:tabular-nums;">{{ year }}</div>
+<div style="flex:1;width:10px;border-radius:5px;background:var(--color-neutral-800);display:flex;flex-direction:column;justify-content:flex-end;overflow:hidden;"><div style="width:100%;height:{{ barW }};background:{{ barDark }};border-radius:5px;"></div></div>
+<div style="display:flex;align-items:baseline;font-variant-numeric:tabular-nums;line-height:1;"><span style="font-size:18px;font-weight:500;letter-spacing:-0.02em;color:var(--color-text);">{{ pct }}</span><span style="font-size:11px;color:var(--color-neutral-400);">%</span></div>
+</div>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:12px;">
+<div style="font-size:13px;color:var(--color-neutral-400);">4×4 · ライト</div>
+<div style="width:316px;height:316px;border-radius:24px;background:var(--color-neutral-100);padding:24px;display:flex;flex-direction:column;box-sizing:border-box;">
+<div style="font-size:16px;font-weight:500;color:var(--color-neutral-600);font-variant-numeric:tabular-nums;">{{ year }}</div>
+<div style="flex:1;"></div>
+<div style="font-size:18px;color:var(--color-neutral-700);">{{ label }}</div>
+<div style="display:flex;align-items:baseline;gap:2px;font-variant-numeric:tabular-nums;line-height:1;margin-top:4px;"><span style="font-size:88px;font-weight:500;letter-spacing:-0.03em;color:var(--color-neutral-900);">{{ pct }}</span><span style="font-size:36px;font-weight:500;color:var(--color-neutral-700);">%</span></div>
+<div style="height:8px;border-radius:4px;background:var(--color-neutral-300);margin-top:20px;overflow:hidden;"><div style="height:100%;width:{{ barW }};background:{{ barLight }};border-radius:4px;"></div></div>
+<div style="display:flex;justify-content:space-between;font-size:12px;color:var(--color-neutral-600);margin-top:6px;"><span>1月</span><span>12月</span></div>
+<div style="font-size:18px;color:var(--color-neutral-900);margin-top:16px;">残り <span style="font-variant-numeric:tabular-nums;">{{ days }}</span> 日</div>
+</div>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:12px;">
+<div style="font-size:13px;color:var(--color-neutral-400);">1×2 · ライト</div>
+<div style="width:72px;height:160px;border-radius:24px;background:var(--color-neutral-100);padding:12px 8px;display:flex;flex-direction:column;align-items:center;gap:8px;box-sizing:border-box;">
+<div style="font-size:11px;font-weight:500;color:var(--color-neutral-600);font-variant-numeric:tabular-nums;">{{ year }}</div>
+<div style="flex:1;width:10px;border-radius:5px;background:var(--color-neutral-300);display:flex;flex-direction:column;justify-content:flex-end;overflow:hidden;"><div style="width:100%;height:{{ barW }};background:{{ barLight }};border-radius:5px;"></div></div>
+<div style="display:flex;align-items:baseline;font-variant-numeric:tabular-nums;line-height:1;"><span style="font-size:18px;font-weight:500;letter-spacing:-0.02em;color:var(--color-neutral-900);">{{ pct }}</span><span style="font-size:11px;color:var(--color-neutral-700);">%</span></div>
+</div>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:10px;max-width:280px;font-size:13px;color:var(--color-neutral-400);line-height:1.6;padding-top:28px;">
+<div style="color:var(--color-text);font-weight:500;">判断したこと</div>
+<div>バーは「残り」を塗る。「あと 13.4%」の数字とバーの長さが一致し、年末に向けて静かに減っていく。</div>
+<div>1×2 は縦長なので縦バー。下から満ち、残りが減ると水位が下がる。</div>
+<div>4×4 は情報を増やさず、割合を大きくして余白で落ち着かせる。</div>
+<div>1×2 は幅が狭いため「あと」と残り日数を省き、年＋バー＋割合のみ。</div>
+</div>
+</div>
+</section>
+
+<section style="display:flex;flex-direction:column;gap:24px;">
+<div style="display:flex;align-items:baseline;gap:12px;"><span style="font-size:12px;color:var(--color-accent-300);">02</span><h3 style="margin:0;">ホーム画面 / アプリ本体</h3></div>
+<div style="display:flex;gap:56px;align-items:flex-start;flex-wrap:wrap;">
+
+<div style="display:flex;flex-direction:column;gap:12px;">
+<div style="font-size:13px;color:var(--color-neutral-400);">ホーム画面（4列グリッド）</div>
+<div style="width:380px;height:780px;border-radius:36px;box-shadow:var(--shadow-md);overflow:hidden;background:radial-gradient(120% 80% at 20% 10%, #353b80 0%, #262a60 35%, #161826 85%);display:flex;flex-direction:column;box-sizing:border-box;padding:14px 22px 22px;">
+<div style="display:flex;justify-content:space-between;font-size:13px;color:var(--color-neutral-200);padding:0 8px;"><span>9:41</span><span>● ● ▮</span></div>
+<div style="margin-top:28px;display:grid;grid-template-columns:316px 1fr;gap:12px 0;">
+<div style="width:316px;height:316px;border-radius:24px;background:#232532;padding:24px;display:flex;flex-direction:column;box-sizing:border-box;grid-column:1 / span 2;">
+<div style="font-size:16px;font-weight:500;color:var(--color-neutral-500);font-variant-numeric:tabular-nums;">{{ year }}</div>
+<div style="flex:1;"></div>
+<div style="font-size:18px;color:var(--color-neutral-400);">{{ label }}</div>
+<div style="display:flex;align-items:baseline;gap:2px;font-variant-numeric:tabular-nums;line-height:1;margin-top:4px;"><span style="font-size:88px;font-weight:500;letter-spacing:-0.03em;color:var(--color-text);">{{ pct }}</span><span style="font-size:36px;font-weight:500;color:var(--color-neutral-400);">%</span></div>
+<div style="height:8px;border-radius:4px;background:var(--color-neutral-800);margin-top:20px;overflow:hidden;"><div style="height:100%;width:{{ barW }};background:{{ barDark }};border-radius:4px;"></div></div>
+<div style="display:flex;justify-content:space-between;font-size:12px;color:var(--color-neutral-600);margin-top:6px;"><span>1月</span><span>12月</span></div>
+<div style="font-size:18px;color:var(--color-text);margin-top:16px;">残り <span style="font-variant-numeric:tabular-nums;">{{ days }}</span> 日</div>
+</div>
+</div>
+<div style="margin-top:20px;display:grid;grid-template-columns:repeat(4,1fr);gap:20px 0;justify-items:center;align-items:start;">
+<div style="width:72px;height:160px;border-radius:24px;background:#232532;padding:12px 8px;display:flex;flex-direction:column;align-items:center;gap:8px;box-sizing:border-box;grid-row:span 2;">
+<div style="font-size:11px;font-weight:500;color:var(--color-neutral-500);font-variant-numeric:tabular-nums;">{{ year }}</div>
+<div style="flex:1;width:10px;border-radius:5px;background:var(--color-neutral-800);display:flex;flex-direction:column;justify-content:flex-end;overflow:hidden;"><div style="width:100%;height:{{ barW }};background:{{ barDark }};border-radius:5px;"></div></div>
+<div style="display:flex;align-items:baseline;font-variant-numeric:tabular-nums;line-height:1;"><span style="font-size:18px;font-weight:500;letter-spacing:-0.02em;color:var(--color-text);">{{ pct }}</span><span style="font-size:11px;color:var(--color-neutral-400);">%</span></div>
+</div>
+<sc-for list="{{ appSlots }}" as="a" hint-placeholder-count="6"><div style="display:flex;flex-direction:column;align-items:center;gap:6px;"><div style="width:52px;height:52px;border-radius:50%;background:var(--color-neutral-800);opacity:0.7;"></div><div style="width:36px;height:6px;border-radius:3px;background:var(--color-neutral-700);opacity:0.6;"></div></div></sc-for>
+</div>
+<div style="flex:1;"></div>
+<div style="height:48px;border-radius:24px;background:rgba(233,233,237,0.10);"></div>
+</div>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:12px;">
+<div style="font-size:13px;color:var(--color-neutral-400);">アプリ本体（MainActivity）</div>
+<div style="width:380px;height:780px;border-radius:36px;box-shadow:var(--shadow-md);overflow:hidden;background:var(--color-bg);display:flex;flex-direction:column;box-sizing:border-box;padding:14px 28px 28px;">
+<div style="display:flex;justify-content:space-between;font-size:13px;color:var(--color-neutral-300);padding:0 2px;"><span>9:41</span><span>● ● ▮</span></div>
+<div style="margin-top:28px;font-size:14px;color:var(--color-neutral-500);">今年あと何%</div>
+<div style="flex:1;display:flex;flex-direction:column;justify-content:center;">
+<div style="font-size:20px;font-weight:500;color:var(--color-neutral-500);font-variant-numeric:tabular-nums;">{{ year }}</div>
+<div style="font-size:22px;color:var(--color-neutral-400);margin-top:20px;">{{ label }}</div>
+<div style="display:flex;align-items:baseline;gap:2px;font-variant-numeric:tabular-nums;line-height:1;margin-top:6px;"><span style="font-size:104px;font-weight:500;letter-spacing:-0.035em;">{{ pct }}</span><span style="font-size:40px;font-weight:500;color:var(--color-neutral-400);">%</span></div>
+<div style="height:8px;border-radius:4px;background:var(--color-neutral-800);margin-top:24px;overflow:hidden;"><div style="height:100%;width:{{ barW }};background:{{ barDark }};border-radius:4px;"></div></div>
+<div style="display:flex;justify-content:space-between;font-size:13px;color:var(--color-neutral-600);margin-top:8px;"><span>1月</span><span>12月</span></div>
+<div style="font-size:20px;margin-top:20px;">残り <span style="font-variant-numeric:tabular-nums;">{{ days }}</span> 日</div>
+</div>
+<p style="font-size:14px;line-height:1.7;color:var(--color-neutral-400);margin:0 0 20px;text-wrap:pretty;">ホーム画面に置くと、今年の残りがいつでも目に入ります。30分ごとに自動で更新され、通信や権限は使いません。</p>
+<button class="btn btn-primary btn-block" style="height:52px;font-size:16px;border-radius:26px;">ホーム画面に追加</button>
+<div style="font-size:12px;color:var(--color-neutral-600);margin-top:12px;text-align:center;">ホーム画面の長押し →「ウィジェット」からも追加できます</div>
+</div>
+</div>
+
+</div>
+</section>
+
+<section style="display:flex;flex-direction:column;gap:24px;">
+<div style="display:flex;align-items:baseline;gap:12px;"><span style="font-size:12px;color:var(--color-accent-300);">03</span><h3 style="margin:0;">アプリアイコン（アダプティブ）</h3></div>
+<div style="display:flex;gap:40px;align-items:flex-end;flex-wrap:wrap;">
+<div style="display:flex;flex-direction:column;gap:10px;align-items:center;"><div style="width:108px;height:108px;background:#161826;position:relative;box-shadow:var(--shadow-sm);display:flex;align-items:center;justify-content:center;"><div style="position:absolute;inset:18px;border:1px dashed var(--color-neutral-700);border-radius:50%;"></div><svg width="56" height="56" viewBox="0 0 56 56"><circle cx="28" cy="28" r="22" fill="none" stroke="#3f424d" stroke-width="7"></circle><circle cx="28" cy="28" r="22" fill="none" stroke="#968ae0" stroke-width="7" stroke-linecap="round" stroke-dasharray="103.7 138.2" transform="rotate(-90 28 28) scale(1 -1) translate(0 -56)"></circle></svg></div><div style="font-size:12px;color:var(--color-neutral-500);">108dp・安全域 72dp</div></div>
+<div style="display:flex;flex-direction:column;gap:10px;align-items:center;"><div style="width:72px;height:72px;border-radius:50%;background:#161826;display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow-sm);"><svg width="40" height="40" viewBox="0 0 56 56"><circle cx="28" cy="28" r="22" fill="none" stroke="#3f424d" stroke-width="7"></circle><circle cx="28" cy="28" r="22" fill="none" stroke="#968ae0" stroke-width="7" stroke-linecap="round" stroke-dasharray="103.7 138.2" transform="rotate(-90 28 28) scale(1 -1) translate(0 -56)"></circle></svg></div><div style="font-size:12px;color:var(--color-neutral-500);">円形マスク</div></div>
+<div style="display:flex;flex-direction:column;gap:10px;align-items:center;"><div style="width:72px;height:72px;border-radius:22px;background:#161826;display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow-sm);"><svg width="40" height="40" viewBox="0 0 56 56"><circle cx="28" cy="28" r="22" fill="none" stroke="#3f424d" stroke-width="7"></circle><circle cx="28" cy="28" r="22" fill="none" stroke="#968ae0" stroke-width="7" stroke-linecap="round" stroke-dasharray="103.7 138.2" transform="rotate(-90 28 28) scale(1 -1) translate(0 -56)"></circle></svg></div><div style="font-size:12px;color:var(--color-neutral-500);">角丸マスク</div></div>
+<div style="display:flex;flex-direction:column;gap:10px;align-items:center;"><div style="width:72px;height:72px;border-radius:50%;background:var(--color-accent-800);display:flex;align-items:center;justify-content:center;"><svg width="40" height="40" viewBox="0 0 56 56"><circle cx="28" cy="28" r="22" fill="none" stroke="#d2cefd" stroke-opacity="0.35" stroke-width="7"></circle><circle cx="28" cy="28" r="22" fill="none" stroke="#d2cefd" stroke-width="7" stroke-linecap="round" stroke-dasharray="103.7 138.2" transform="rotate(-90 28 28) scale(1 -1) translate(0 -56)"></circle></svg></div><div style="font-size:12px;color:var(--color-neutral-500);">モノクロ（テーマアイコン）</div></div>
+<div style="max-width:300px;font-size:13px;line-height:1.6;color:var(--color-neutral-400);">リングは「残り」を表す 3/4 弧。前景はリングのみ、背景は単色 #161826。モノクロ版は不透明度 35% のトラックを含めた 1 色レイヤーで書き出す。</div>
+</div>
+</section>
+
+<section style="display:flex;flex-direction:column;gap:24px;">
+<div style="display:flex;align-items:baseline;gap:12px;"><span style="font-size:12px;color:var(--color-accent-300);">04</span><h3 style="margin:0;">実装用の数値</h3></div>
+<div style="display:grid;grid-template-columns:repeat(3,minmax(0,360px));gap:24px;font-size:13px;line-height:1.7;">
+<div class="card" style="display:flex;flex-direction:column;gap:6px;">
+<div style="color:var(--color-text);font-weight:500;margin-bottom:4px;">配色</div>
+<div style="display:grid;grid-template-columns:1fr 120px 120px;gap:4px 8px;color:var(--color-neutral-400);">
+<span></span><span>ダーク</span><span>ライト</span>
+<span>背景</span><span>#232532</span><span>#F3F5FE</span>
+<span>主テキスト</span><span>#E9E9ED</span><span>#292B31</span>
+<span>補助テキスト</span><span>#9397AB</span><span>#595D6C</span>
+<span>目盛り文字</span><span>#75798C</span><span>#75798C</span>
+<span>バー（30%超）</span><span>oklch(.72 .13 155)</span><span>oklch(.55 .13 155)</span>
+<span>バー（30%以下）</span><span>oklch(.68 .16 25)</span><span>oklch(.55 .17 25)</span>
+<span>バー トラック</span><span>#3F424D</span><span>#CFD3E5</span>
+</div>
+<div style="color:var(--color-neutral-500);margin-top:6px;">Android 12+ は Dynamic Color：背景 → surfaceContainer、主テキスト → onSurface、補助 → onSurfaceVariant、バー → primary、トラック → secondaryContainer。上表は 11 以下のフォールバック。</div>
+</div>
+<div class="card" style="display:flex;flex-direction:column;gap:6px;">
+<div style="color:var(--color-text);font-weight:500;margin-bottom:4px;">文字・余白（sp / dp）</div>
+<div style="display:grid;grid-template-columns:1fr 64px 64px;gap:4px 8px;color:var(--color-neutral-400);">
+<span></span><span>4×4</span><span>1×2</span>
+<span>パディング</span><span>24</span><span>12 / 8</span>
+<span>年</span><span>16 M</span><span>11 M</span>
+<span>「あと」</span><span>18</span><span>—</span>
+<span>割合 数字</span><span>88 M</span><span>18 M</span>
+<span>割合 %</span><span>36 M</span><span>11</span>
+<span>バー 太さ</span><span>8</span><span>10（縦）</span>
+<span>目盛り（1月/12月）</span><span>12</span><span>—</span>
+<span>残り日数</span><span>18</span><span>—</span>
+</div>
+<div style="color:var(--color-neutral-500);margin-top:6px;">M = Medium(500)。フォントはシステム既定、数字は等幅（tnum）。角丸は system_app_widget_background_radius。</div>
+</div>
+<div class="card" style="display:flex;flex-direction:column;gap:6px;color:var(--color-neutral-400);">
+<div style="color:var(--color-text);font-weight:500;margin-bottom:4px;">Glance 実装メモ</div>
+<div>SizeMode.Responsive：DpSize(57, 110) → 1×2、DpSize(250, 250) → 4×4。中間サイズは近い方を使用。</div>
+<div>1×2 を許可するため year_widget_info.xml の minWidth を 40dp、minHeight を 110dp に、targetCellWidth/Height は 4 / 4 に変更。</div>
+<div>4×4 のバーは LinearProgressIndicator(progress = 残り比)。</div>
+<div>1×2 の縦バーは Box(トラック) 内に Box(高さ = LocalSize.height × 残り比) を下寄せ。</div>
+<div>ピッカー用プレビューはダーク 4×4、値 13.4% / 残り 49 日の固定レイアウト。</div>
+</div>
+</div>
+</section>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;fill&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;remaining&quot;,&quot;elapsed&quot;],&quot;default&quot;:&quot;remaining&quot;,&quot;tsType&quot;:&quot;'remaining'|'elapsed'&quot;},&quot;label&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;あと&quot;,&quot;残り&quot;],&quot;default&quot;:&quot;あと&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  componentDidMount() { this.t = setInterval(() => this.forceUpdate(), 60000); }
+  componentWillUnmount() { clearInterval(this.t); }
+  renderVals() {
+    const fill = this.props.fill ?? 'remaining';
+    const label = this.props.label ?? 'あと';
+    const now = new Date();
+    const y = now.getFullYear();
+    const start = new Date(y, 0, 1), end = new Date(y + 1, 0, 1);
+    const ratio = (end - now) / (end - start);
+    const pct = Math.max(0.1, Math.ceil(ratio * 1000) / 10);
+    const today = new Date(y, now.getMonth(), now.getDate());
+    const days = Math.round((end - today) / 86400000);
+    const w = fill === 'remaining' ? ratio : 1 - ratio;
+    return {
+      year: String(y), pct: pct.toFixed(1), days: String(days),
+      label: label === 'あと' ? 'あと' : '残り',
+      barW: (w * 100).toFixed(2) + '%',
+      barDark: pct > 30 ? 'oklch(0.72 0.13 155)' : 'oklch(0.68 0.16 25)',
+      barLight: pct > 30 ? 'oklch(0.55 0.13 155)' : 'oklch(0.55 0.17 25)',
+      appSlots: [1, 2, 3, 4, 5, 6]
+    };
+  }
+}
+</script>
+</body>
+</html>
