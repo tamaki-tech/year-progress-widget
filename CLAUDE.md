@@ -129,6 +129,13 @@ README と本ファイルの記述が食い違う場合、**デザイン（見�
 - フォントはシステム既定、数字は等幅。角丸は `system_app_widget_background_radius`
 - Android 12+ は Dynamic Color（`GlanceTheme`）、11 以下・プレビューは固定色（`ColorProvider(day, night)`）
 
+## リリース
+
+- `app/build.gradle.kts` の `versionCode` / `versionName` を上げて main にマージし、`vX.Y.Z` タグを push する → `.github/workflows/release.yml` がテスト・署名ビルド・来歴証明（Artifact Attestation）・GitHub Release 作成を行う
+- リリースノート本文は `.github/release-notes.md`（署名証明書の指紋・確認方法は CI が追記）
+- 署名鍵は GitHub Secrets（`RELEASE_KEYSTORE_BASE64` / `RELEASE_KEYSTORE_PASSWORD` / `RELEASE_KEY_ALIAS`）にあり、原本はリポジトリ外（オーナーの手元）に保管。**鍵・パスワードをリポジトリやログに出さない。鍵を差し替えると既存ユーザーが更新できなくなる**
+- 署名証明書 SHA-256: `34:5B:22:60:F3:C6:D7:76:91:A1:4B:1F:CC:2D:FE:7D:B1:81:59:6B:7E:23:D7:E2:E8:F7:5B:AF:69:DF:14:B5`
+
 ## 将来の拡張（初期スコープ外）
 
 - 経過%／残り%の切り替え、小数桁数の設定（`PreferencesGlanceStateDefinition` でウィジェットごとに保存）
