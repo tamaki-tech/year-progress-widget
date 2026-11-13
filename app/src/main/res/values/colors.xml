@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- ウィジェット固定色（ライト）。ダークは values-night。Android 11 以下とプレビュー用 -->
+    <color name="widget_background">#F3F5FE</color>
+    <color name="widget_text_primary">#292B31</color>
+    <color name="widget_text_year">#75798C</color>
+    <color name="widget_text_secondary">#595D6C</color>
+    <color name="widget_text_tick">#75798C</color>
+    <color name="widget_track">#CFD3E5</color>
+    <color name="widget_bar_green">#14874E</color>
+    <color name="widget_bar_red">#C13C3B</color>
+
+    <!-- アプリ本体・アイコン（ダーク固定） -->
+    <color name="app_background">#161826</color>
+    <color name="app_accent">#9184D9</color>
+    <color name="icon_background">#161826</color>
+</resources>
