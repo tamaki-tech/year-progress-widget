@@ -12,14 +12,31 @@ android {
         applicationId = "com.tamakitech.yearprogress"
         minSdk = 26
         targetSdk = 36
-        versionCode = 1
-        versionName = "1.0.0"
+        versionCode = 2
+        versionName = "1.0.1"
+    }
+
+    // リリース署名。鍵はリポジトリに置かず、環境変数（CI では GitHub Secrets）から渡す。
+    // 未設定の場合、assembleRelease は未署名 APK を出力する。
+    val releaseKeystore = System.getenv("RELEASE_KEYSTORE_FILE")?.let { file(it) }
+    signingConfigs {
+        if (releaseKeystore != null) {
+            create("release") {
+                storeFile = releaseKeystore
+                storePassword = System.getenv("RELEASE_KEYSTORE_PASSWORD")
+                keyAlias = System.getenv("RELEASE_KEY_ALIAS")
+                keyPassword = System.getenv("RELEASE_KEYSTORE_PASSWORD")
+                storeType = "pkcs12"
+            }
+        }
     }
 
     buildTypes {
         release {
-            isMinifyEnabled = true
-            isShrinkResources = true
+            signingConfig = signingConfigs.findByName("release")
+            // 実機未検証の R8 による不具合を避けるため、初期リリースでは縮小しない
+            isMinifyEnabled = false
+            isShrinkResources = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
     }

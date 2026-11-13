@@ -1,0 +1,88 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write      # GitHub Release の作成
+  id-token: write      # 来歴証明（Sigstore）の発行
+  attestations: write  # 来歴証明の保存
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: android-actions/setup-android@v3
+        with:
+          packages: "platforms;android-36 build-tools;35.0.0"
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Unit tests
+        run: ./gradlew :app:testDebugUnitTest --console=plain
+
+      - name: Build signed release APK
+        env:
+          RELEASE_KEYSTORE_BASE64: ${{ secrets.RELEASE_KEYSTORE_BASE64 }}
+          RELEASE_KEYSTORE_PASSWORD: ${{ secrets.RELEASE_KEYSTORE_PASSWORD }}
+          RELEASE_KEY_ALIAS: ${{ secrets.RELEASE_KEY_ALIAS }}
+        run: |
+          export RELEASE_KEYSTORE_FILE="$RUNNER_TEMP/release.p12"
+          echo "$RELEASE_KEYSTORE_BASE64" | base64 -d > "$RELEASE_KEYSTORE_FILE"
+          ./gradlew :app:assembleRelease --console=plain
+          rm -f "$RELEASE_KEYSTORE_FILE"
+
+      - name: Verify signature
+        id: verify
+        run: |
+          APK="year-progress-${GITHUB_REF_NAME}.apk"
+          cp app/build/outputs/apk/release/app-release.apk "$APK"
+          APKSIGNER="$ANDROID_HOME/build-tools/35.0.0/apksigner"
+          "$APKSIGNER" verify --verbose --print-certs "$APK" | tee verify.txt
+          CERT_SHA256=$(grep -m1 'certificate SHA-256 digest' verify.txt | awk '{print $NF}')
+          test -n "$CERT_SHA256"
+          echo "apk=$APK" >> "$GITHUB_OUTPUT"
+          echo "cert_sha256=$CERT_SHA256" >> "$GITHUB_OUTPUT"
+          echo "apk_sha256=$(sha256sum "$APK" | awk '{print $1}')" >> "$GITHUB_OUTPUT"
+
+      - name: Attest build provenance
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: ${{ steps.verify.outputs.apk }}
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          APK: ${{ steps.verify.outputs.apk }}
+          CERT_SHA256: ${{ steps.verify.outputs.cert_sha256 }}
+          APK_SHA256: ${{ steps.verify.outputs.apk_sha256 }}
+        run: |
+          cat > notes.md <<NOTES
+          $(cat .github/release-notes.md)
+
+          ## 発行元の確認
+          この APK は GitHub Actions 上で \`${GITHUB_REPOSITORY}\` の \`${GITHUB_SHA}\` からビルド・署名され、来歴証明（Artifact Attestation）が付いています。
+
+          | 項目 | 値 |
+          |---|---|
+          | 署名証明書 SHA-256 | \`${CERT_SHA256}\` |
+          | APK SHA-256 | \`${APK_SHA256}\` |
+          | ビルド記録 | ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID} |
+
+          確認方法（PC）:
+          \`\`\`
+          gh attestation verify ${APK} --repo ${GITHUB_REPOSITORY}
+          apksigner verify --print-certs ${APK}
+          \`\`\`
+          今後のバージョンもすべて同じ署名証明書で署名されます。証明書が異なる APK は本リポジトリの発行物ではありません。
+          NOTES
+          gh release create "$GITHUB_REF_NAME" "$APK" --title "$GITHUB_REF_NAME — 今年あと何%" --notes-file notes.md
