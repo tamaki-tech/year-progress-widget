@@ -1,0 +1,15 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent" android:layout_height="match_parent" android:background="@drawable/widget_preview_background" android:orientation="vertical" android:padding="24dp">
+    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="2026" android:textColor="#9397AB" android:textSize="16sp" android:textStyle="bold"/>
+    <FrameLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1"/>
+    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="あと" android:textColor="#B2B6CA" android:textSize="18sp"/>
+    <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:gravity="bottom" android:orientation="horizontal">
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="13.4" android:textColor="#E9E9ED" android:textSize="88sp" android:fontFamily="sans-serif-medium" android:includeFontPadding="false"/>
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="2dp" android:text="%" android:textColor="#B2B6CA" android:textSize="36sp" android:fontFamily="sans-serif-medium"/>
+    </LinearLayout>
+    <ProgressBar style="?android:attr/progressBarStyleHorizontal" android:layout_width="match_parent" android:layout_height="8dp" android:layout_marginTop="20dp" android:max="1000" android:progress="134" android:progressDrawable="@drawable/widget_preview_progress"/>
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="6dp" android:orientation="horizontal">
+        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="1月" android:textColor="#75798C" android:textSize="12sp"/>
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="12月" android:textColor="#75798C" android:textSize="12sp"/>
+    </LinearLayout>
+    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="16dp" android:text="残り 49 日" android:textColor="#E9E9ED" android:textSize="18sp"/>
+</LinearLayout>

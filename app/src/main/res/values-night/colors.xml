@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="widget_background">#232532</color>
+    <color name="widget_text_primary">#E9E9ED</color>
+    <color name="widget_text_year">#9397AB</color>
+    <color name="widget_text_secondary">#B2B6CA</color>
+    <color name="widget_text_tick">#75798C</color>
+    <color name="widget_track">#3F424D</color>
+    <color name="widget_bar_green">#57BC80</color>
+    <color name="widget_bar_red">#EA6A64</color>
+</resources>

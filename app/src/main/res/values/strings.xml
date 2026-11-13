@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">今年あと何%</string>
+    <string name="label_remaining_prefix">あと</string>
+    <string name="percent_suffix">%</string>
+    <string name="remaining_days">残り %1$d 日</string>
+    <string name="month_start">1月</string>
+    <string name="month_end">12月</string>
+    <string name="main_description">ホーム画面に置くと、今年の残りがいつでも目に入ります。30分ごとに自動で更新され、通信や権限は使いません。</string>
+    <string name="add_to_home">ホーム画面に追加</string>
+    <string name="add_hint">ホーム画面の長押し →「ウィジェット」からも追加できます</string>
+    <string name="widget_desc">今年の残りを % で表示します</string>
+</resources>
