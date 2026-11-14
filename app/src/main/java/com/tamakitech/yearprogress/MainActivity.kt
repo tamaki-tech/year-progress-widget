@@ -42,7 +42,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
-import com.tamakitech.yearprogress.widget.YearWidgetReceiver
+import com.tamakitech.yearprogress.widget.YearWidgetProvider
 
 private object AppColors {
     val Background = Color(0xFF161826)
@@ -75,7 +75,7 @@ class MainActivity : ComponentActivity() {
                     canPin = canPin,
                     onAddWidget = {
                         manager?.requestPinAppWidget(
-                            ComponentName(this, YearWidgetReceiver::class.java),
+                            ComponentName(this, YearWidgetProvider::class.java),
                             null,
                             null,
                         )
@@ -83,6 +83,12 @@ class MainActivity : ComponentActivity() {
                 )
             }
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // アプリを開いたらウィジェットも最新の値に揃える
+        YearWidgetProvider.updateAll(this)
     }
 }
 
