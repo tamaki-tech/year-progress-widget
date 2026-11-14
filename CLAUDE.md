@@ -16,12 +16,12 @@
 | 項目 | 選定 | 補足 |
 |---|---|---|
 | 言語 | Kotlin | |
-| ウィジェット UI | Jetpack Glance | RemoteViews を直接書かない |
+| ウィジェット UI | `AppWidgetProvider` ＋ RemoteViews（XML レイアウト） | Glance は使わない（下記「ウィジェット描画方式」） |
 | アプリ UI | Jetpack Compose（Material 3） | |
 | 日付計算 | `java.time` | `Calendar` / `Date` は使わない |
 | minSdk | 26 | `java.time` をデスugaringなしで利用 |
 | targetSdk | 最新安定版 | |
-| 定期更新 | `updatePeriodMillis` ＋ システムブロードキャスト | WorkManager は導入しない |
+| 定期更新 | `updatePeriodMillis` ＋ システムブロードキャスト | WorkManager・JobScheduler など遅延実行を経由させない |
 
 ## ディレクトリ構成
 
@@ -29,11 +29,11 @@
 app/src/main/java/.../
 ├─ YearProgress.kt            … 計算ロジック（Android 非依存の純 Kotlin）
 ├─ widget/
-│   ├─ YearWidget.kt          … GlanceAppWidget（表示）
-│   ├─ YearWidgetReceiver.kt  … GlanceAppWidgetReceiver
+│   ├─ YearWidgetProvider.kt  … AppWidgetProvider（RemoteViews を組み立てて即時反映、updateAll）
 │   └─ TimeChangeReceiver.kt  … 時刻・タイムゾーン変更時に updateAll
 └─ MainActivity.kt            … 説明 ＋ requestPinAppWidget ボタン
 app/src/main/res/xml/year_widget_info.xml
+app/src/main/res/layout/widget_large.xml / widget_small.xml  … 4×4 / 1×2 レイアウト
 app/src/test/.../YearProgressTest.kt
 docs/design_handoff_year_progress_widget/  … UI/UX 設計資料（「デザイン（確定）」参照）
 ```
@@ -67,7 +67,7 @@ fun calcYearProgress(clock: Clock = Clock.systemDefaultZone()): YearProgress {
 1時間あたりの変化は約 0.011%（小数第1位の表示が変わるのは約 8.8 時間ごと）なので、高頻度更新は不要。
 
 1. `updatePeriodMillis = 1800000`（30分。OS の最小値）
-2. `TimeChangeReceiver` で `ACTION_TIME_CHANGED`（TIME_SET）と `ACTION_TIMEZONE_CHANGED` を受け、`YearWidget().updateAll(context)` を呼ぶ（どちらもマニフェスト登録可能な例外ブロードキャスト）
+2. `TimeChangeReceiver` で `ACTION_TIME_CHANGED`（TIME_SET）と `ACTION_TIMEZONE_CHANGED` を受け、`YearWidgetProvider.updateAll(context)` を呼ぶ（どちらもマニフェスト登録可能な例外ブロードキャスト）
 3. 年またぎは最大30分の遅れを許容する。厳密にする場合のみ `AlarmManager.setWindow` で翌 1/1 0:00 に予約（`SCHEDULE_EXACT_ALARM` 権限は使わない）
 
 `year_widget_info.xml`：
@@ -86,8 +86,14 @@ fun calcYearProgress(clock: Clock = Clock.systemDefaultZone()): YearProgress {
 
 ## 実装上の注意
 
-- Glance の `CircularProgressIndicator` は進捗値を指定できない（indeterminate のみ）。円形表示が必要なら Bitmap 描画か画像リソースで対応し、まずは `LinearProgressIndicator` を使う
-- `SizeMode.Responsive` を使い、サイズごとにレイアウトを出し分ける（下記「デザイン（確定）」参照）
+### ウィジェット描画方式
+
+- Jetpack Glance は使わない。Glance は描画を WorkManager（遅延可能なジョブ）で実行するため、ほとんど開かれないアプリは App Standby Bucket の制限で描画が最大 1 日程度後回しにされ、ウィジェットの値が古いまま残る不具合が実機で起きた（v1.0.1）
+- `onUpdate` / `onAppWidgetOptionsChanged` / `updateAll` の中で同期的に `RemoteViews` を組み立てて `updateAppWidget` する。描画のための遅延実行（WorkManager・コルーチンの非同期起動など）を挟まない
+- サイズ出し分け：Android 12+ は `RemoteViews(Map<SizeF, RemoteViews>)`（57×110 → 小、250×250 → 大）。11 以下は `OPTION_APPWIDGET_MIN_WIDTH` / `MAX_HEIGHT` で判定
+- 進捗バーは `ClipDrawable` を `ImageView` に置き、`setImageLevel`（0〜10000 = 残り割合）で塗る。横は左から、縦は下から
+- 配色はリソースで切り替える：`values` / `values-night` が固定色、`values-v31` / `values-night-v31` がダイナミックカラー（`@android:color/system_*`）。バー色（緑/赤）は常に固定色
+- アプリ本体を開いたとき（`onResume`）にも `updateAll` してウィジェットを揃える
 - ウィジェットのタップで `MainActivity` を開く
 - 文字列は `strings.xml` に置く（日本語を既定にし、英語は後で追加）。キーと値はデザイン資料 README の「strings.xml」に従う
 
@@ -112,14 +118,14 @@ UI/UX の設計資料は **`docs/design_handoff_year_progress_widget/`** にあ�
 | ファイル | 内容 |
 |---|---|
 | `docs/design_handoff_year_progress_widget/README.md` | **確定仕様（正）**。各サイズのレイアウト・文字サイズ・余白・配色（Dynamic Color 対応表／固定色）・挙動・`year_widget_info.xml`・`strings.xml` の値 |
-| `docs/design_handoff_year_progress_widget/Year Progress.dc.html` | ビジュアル参照（ブラウザで開く。1px = 1dp）。HTML をそのまま移植せず、Glance / Compose で作り直す |
+| `docs/design_handoff_year_progress_widget/Year Progress.dc.html` | ビジュアル参照（ブラウザで開く。1px = 1dp）。HTML をそのまま移植せず、RemoteViews（ウィジェット）/ Compose（アプリ本体）で作り直す |
 | `support.js`、`_ds/…` | 上記 HTML の表示用依存ファイル。実装では使わない |
 
-README と本ファイルの記述が食い違う場合、**デザイン（見た目・文言・サイズ）は README を優先**し、計算ロジック・更新方針・技術スタックは本ファイルを優先する。
+README と本ファイルの記述が食い違う場合、**デザイン（見た目・文言・サイズ）は README を優先**し、計算ロジック・更新方針・技術スタックは本ファイルを優先する。README 内の Glance 前提の実装メモ（`GlanceTheme`・`SizeMode`・`LinearProgressIndicator` など）は「ウィジェット描画方式」の方法に読み替える。
 
 要点：
 
-- サイズ：4×4（Responsive `DpSize(250.dp, 250.dp)`〜）と 1×2（`DpSize(57.dp, 110.dp)`〜、縦長）。1×1 円形表示は作らない
+- サイズ：4×4（250×250dp〜）と 1×2（57×110dp〜、縦長）。1×1 円形表示は作らない
 - 表記「あと 13.4%」、バーは「残り」を塗る（年末に向けて減る）
 - バー色：表示値（切り上げ後）> 30.0% → 緑（ダーク #57BC80 / ライト #14874E）、≤ 30.0% → 赤（#EA6A64 / #C13C3B）。バー色はダイナミックカラーに追従させない
 - 4×4：年 16sp / あと 18sp / 割合 88sp + % 36sp / バー 8dp / 1月・12月 12sp / 残り日数 18sp、パディング 24dp、下寄せ
@@ -127,7 +133,7 @@ README と本ファイルの記述が食い違う場合、**デザイン（見�
 - アプリ本体：背景 #161826、大きな割合表示＋説明文＋`OutlinedButton`「ホーム画面に追加」（`requestPinAppWidget`、非対応時はボタン非表示）
 - アイコン：背景 #161826、前景は 3/4 周のリング（VectorDrawable）、モノクロ版あり
 - フォントはシステム既定、数字は等幅。角丸は `system_app_widget_background_radius`
-- Android 12+ は Dynamic Color（`GlanceTheme`）、11 以下・プレビューは固定色（`ColorProvider(day, night)`）
+- Android 12+ は Dynamic Color（`values-v31` の `@android:color/system_*`）、11 以下・プレビューは固定色（`values` / `values-night`）
 
 ## リリース
 
@@ -138,7 +144,7 @@ README と本ファイルの記述が食い違う場合、**デザイン（見�
 
 ## 将来の拡張（初期スコープ外）
 
-- 経過%／残り%の切り替え、小数桁数の設定（`PreferencesGlanceStateDefinition` でウィジェットごとに保存）
+- 経過%／残り%の切り替え、小数桁数の設定（ウィジェット ID ごとに SharedPreferences へ保存）
 - 今月・今週・今日の残り%ウィジェット
 
 ---
